@@ -47,7 +47,7 @@ def get_out_training_dataset(dataset):
             
             valset_out = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transforms.ToTensor())
     elif dataset=='imagenet-30':
-        trainset_out = torchvision.datasets.ImageFolder(root = './train', loader=food_loader, 
+        trainset_out = torchvision.datasets.ImageFolder(root = '/mnt/new_drive/Masoud_WorkDir/Dataset/one_class_train', loader=food_loader, 
                                                         transform = transforms.Compose([transforms.ToPILImage(),
                                                                                         transforms.RandomChoice(
                                                                                             [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
@@ -55,7 +55,7 @@ def get_out_training_dataset(dataset):
                                                                                             transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
                                                                                         transforms.ToTensor(),  ]))
 
-        trainset_out = torchvision.datasets.ImageFolder(root = './test', loader=food_loader, 
+        trainset_out = torchvision.datasets.ImageFolder(root = '/mnt/new_drive/Masoud_WorkDir/Dataset/one_class_test', loader=food_loader, 
                                                         transform = transforms.Compose([transforms.ToPILImage(),
                                                                                         transforms.RandomChoice(
                                                                                             [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
