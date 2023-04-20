@@ -3,6 +3,13 @@ import torch
 from torch.utils.data import DataLoader
 import torchvision
 from torchvision import transforms
+from torch.utils.data import DataLoader, random_split
+
+def splitDataset(dataset):
+    train_size = 5000
+    test_size = len(dataset) - train_size
+    trainset, _ = random_split(dataset, [train_size, test_size])    
+    return trainset
 
 
 def food_loader(path):
@@ -11,8 +18,10 @@ def food_loader(path):
     return img
 
 def get_out_training_dataset(dataset):
+
+    print(f'\n Exposure Dataset Is : {dataset}\n')
     
-    if dataset=='food-101':
+    if dataset=='food-101' or dataset=='gaussian':
         trainset_out = torchvision.datasets.ImageFolder(root = 'data/food-101/images/', loader=food_loader, 
                                                         transform = transforms.Compose([transforms.ToPILImage(),
                                                                                         transforms.RandomChoice(
@@ -25,7 +34,6 @@ def get_out_training_dataset(dataset):
     
     elif dataset=='mnist':
         trainset_out=torchvision.datasets.MNIST(root='./data', train = True, download = True, transform=transforms.Compose([
-            transforms.ToPILImage(),
                                                                                         transforms.RandomChoice(
                                                                                             [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
                                                                                             transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
@@ -35,10 +43,14 @@ def get_out_training_dataset(dataset):
                                                                                                   transforms.Lambda(lambda x : x.repeat(3, 1, 1)),
                                                                                                   ]))
         
-        valset_out = torchvision.datasets.MNIST(root='./data', train = False, download=True, transform=transforms.ToTensor())
+        valset_out = torchvision.datasets.MNIST(root='./data', train = False, download=True,  transform=transforms.Compose([transforms.ToTensor(),
+                                                                                                  transforms.Resize(32),
+                                                                                                  transforms.Lambda(lambda x : x.repeat(3, 1, 1)),
+                                                                                                  ]))
 
     elif dataset=='svhn':
-            trainset_out=torchvision.datasets.SVHN(root='./data', split='train', download = True, transform=transforms.Compose([transforms.ToPILImage(),
+            trainset_out=torchvision.datasets.SVHN(root='./data', split='train', download = True, transform=transforms.Compose([
+                
                                                                                         transforms.RandomChoice(
                                                                                             [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
                                                                                             transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
@@ -55,14 +67,18 @@ def get_out_training_dataset(dataset):
                                                                                             transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
                                                                                         transforms.ToTensor(),  ]))
 
-        trainset_out = torchvision.datasets.ImageFolder(root = '/mnt/new_drive/Masoud_WorkDir/Dataset/one_class_test', loader=food_loader, 
-                                                        transform = transforms.Compose([transforms.ToPILImage(),
-                                                                                        transforms.RandomChoice(
-                                                                                            [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
-                                                                                            transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
-                                                                                            transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
-                                                                                        transforms.ToTensor(),  ]))
+        valset_out = torchvision.datasets.ImageFolder(root = '/mnt/new_drive/Masoud_WorkDir/Dataset/one_class_test', loader=food_loader, 
+                                                        transform = transforms.Compose([
+                                                                                        transforms.ToTensor(), 
+                                                                                          transforms.Resize(32), ]))
 
+
+
+        
+    trainset_out=splitDataset(trainset_out)
+
+    if dataset!='imagenet-30':
+        valset_out=splitDataset(valset_out)
 
 
     return trainset_out,valset_out

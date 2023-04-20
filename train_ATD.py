@@ -14,6 +14,8 @@ from data.open_set import get_out_training_loaders
 from pgd_attack import attack_pgd
 from models.DCGAN import Generator_fea, Discriminator_fea, wrapper_fea, Generator_pix, Discriminator_pix, weights_init
 
+from tqdm import tqdm
+
 
 os.environ['TORCH_HOME'] = 'models/'
 
@@ -59,7 +61,7 @@ print('Run name:', run_name)
 
 
 exposure_name = args.exposure_name
-print('Run name:', exposure_name)
+print('Exposure name:', exposure_name)
 
 #set random seed
 seed = args.seed
@@ -153,10 +155,15 @@ best_auc = 0
 
 print("Starting Training Loop...")
 # For each epoch
-for epoch in range(num_epochs):
+for epoch in tqdm(range(num_epochs)):
        
     for i, ((x, y), (x_out, y_out)) in enumerate(zip(trainloader, trainloader_out), 0):
 
+        
+        if exposure_name=='gaussian':
+            x_out=torch.randn_like(x_out)
+        
+        
         # Format batch
         x = x.to(device)
         x_out = x_out.to(device)
@@ -263,6 +270,10 @@ for epoch in range(num_epochs):
         scores_in += output.cpu().detach().tolist()
     
     for (x, y) in valloader_out:
+
+        if exposure_name=='gaussian':
+            x=torch.randn_like(x)
+
         x = x.to(device)
         if clean_val:
             delta = torch.zeros_like(x)

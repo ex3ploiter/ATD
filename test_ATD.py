@@ -15,6 +15,38 @@ from models.DCGAN import Generator_fea, Discriminator_fea, wrapper_fea, Generato
 
 os.environ['TORCH_HOME'] = 'models/'
 
+
+
+import logging
+
+
+class GeneralLogger:
+    def __init__(self, log_file):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        self.log_file = log_file
+        
+        # create a file handler and set its level to INFO
+        handler = logging.FileHandler(log_file)
+        handler.setLevel(logging.INFO)
+
+        # create a logging format
+        formatter = logging.Formatter('%(asctime)s %(message)s')
+        handler.setFormatter(formatter)
+
+        # add the handler to the logger
+        self.logger.addHandler(handler)
+
+    def log(self, *args):
+        # concatenate all the arguments into a single message
+        message = ' '.join(map(str, args))
+        
+        # log the message
+        self.logger.info(message)
+
+
+
+
 #get args
 def get_args():
     parser = argparse.ArgumentParser()
@@ -139,29 +171,44 @@ for i, dataset in enumerate(out_datasets):
             scores_out[i][j] += output.cpu().detach().tolist()
 
 
+
+
+for folder in ['./Logs/']:
+    if not os.path.exists(folder):
+        os.makedirs(folder) 
+general_logger = GeneralLogger(f'./Logs/{run_name}.log')
+
 #auc
 for i, score_out_dataset in enumerate(scores_out):
 
-    print('\ndataset:', out_names[i])
+    print('\ndataset:'+ str(out_names[i]))
+    general_logger.log('\ndataset:', str(out_names[i]))
 
     print('\njust in attacked')
+    general_logger.log('\njust in attacked')
+
     score_out = score_out_dataset[0]
     for k, score_in in enumerate(scores_in):
         onehots = np.array([1]*len(score_out) + [0]*len(score_in))
         scores = np.concatenate([score_out, score_in],axis=0)
         auroc = roc_auc_score(onehots, -scores)
         print('eps=', epsilons[k], ':', auroc)
+        general_logger.log('eps=', epsilons[k], ':', auroc)
 
 
     print('\njust out attacked')
+    general_logger.log('\njust out attacked')
+
     score_in = scores_in[0]
     for k, score_out in enumerate(score_out_dataset):
         onehots = np.array([1]*len(score_out) + [0]*len(score_in))
         scores = np.concatenate([score_out, score_in],axis=0)
         auroc = roc_auc_score(onehots, -scores)
         print('eps=', epsilons[k], ':', auroc)
+        general_logger.log('eps=', epsilons[k], ':', auroc)
 
     print('\nboth attacked')
+    general_logger.log('\nboth attacked')
     for k in range(len(scores_in)):
         score_in = scores_in[k]
         score_out = score_out_dataset[k]
@@ -170,3 +217,4 @@ for i, score_out_dataset in enumerate(scores_out):
         scores = np.concatenate([score_out, score_in],axis=0)
         auroc = roc_auc_score(onehots, -scores)
         print('eps=', epsilons[k], ':', auroc)
+        general_logger.log('eps=', epsilons[k], ':', auroc)
