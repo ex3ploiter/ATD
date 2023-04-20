@@ -10,21 +10,86 @@ def food_loader(path):
     img=cv2.resize(img,(32,32))
     return img
 
-def get_out_training_loaders(batch_size):
+def get_out_training_dataset(dataset):
+    
+    if dataset=='food-101':
+        trainset_out = torchvision.datasets.ImageFolder(root = 'data/food-101/images/', loader=food_loader, 
+                                                        transform = transforms.Compose([transforms.ToPILImage(),
+                                                                                        transforms.RandomChoice(
+                                                                                            [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
+                                                                                        transforms.ToTensor(),  ]))
+    
+        valset_out = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transforms.ToTensor())
+    
+    elif dataset=='mnist':
+        trainset_out=torchvision.datasets.MNIST(root='./data', train = True, download = True, transform=transforms.Compose([
+            transforms.ToPILImage(),
+                                                                                        transforms.RandomChoice(
+                                                                                            [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
+                                                                                            transforms.ToTensor(),
+                                                                                                  transforms.Resize(32),
+                                                                                                  transforms.Lambda(lambda x : x.repeat(3, 1, 1)),
+                                                                                                  ]))
+        
+        valset_out = torchvision.datasets.MNIST(root='./data', train = False, download=True, transform=transforms.ToTensor())
 
-    trainset_out = torchvision.datasets.ImageFolder(root = 'data/food-101/images/', loader=food_loader, 
-                                                    transform = transforms.Compose([transforms.ToPILImage(),
-                                                                                    transforms.RandomChoice(
-                                                                                        [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
-                                                                                         transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
-                                                                                         transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
-                                                                                    transforms.ToTensor(),  ]))
+    elif dataset=='svhn':
+            trainset_out=torchvision.datasets.SVHN(root='./data', split='train', download = True, transform=transforms.Compose([transforms.ToPILImage(),
+                                                                                        transforms.RandomChoice(
+                                                                                            [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
+                                                                                        transforms.ToTensor(),  ]))
+            
+            valset_out = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transforms.ToTensor())
+    elif dataset=='imagenet-30':
+        trainset_out = torchvision.datasets.ImageFolder(root = './train', loader=food_loader, 
+                                                        transform = transforms.Compose([transforms.ToPILImage(),
+                                                                                        transforms.RandomChoice(
+                                                                                            [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
+                                                                                        transforms.ToTensor(),  ]))
+
+        trainset_out = torchvision.datasets.ImageFolder(root = './test', loader=food_loader, 
+                                                        transform = transforms.Compose([transforms.ToPILImage(),
+                                                                                        transforms.RandomChoice(
+                                                                                            [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
+                                                                                            transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
+                                                                                        transforms.ToTensor(),  ]))
+
+
+
+    return trainset_out,valset_out
+
+
+def get_out_training_loaders(batch_size,exposure_name):
+    trainset_out,valset_out=get_out_training_dataset(exposure_name)
+    
     trainloader_out = DataLoader(trainset_out, batch_size=batch_size, shuffle=True, num_workers=2)
-
-    valset_out = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transforms.ToTensor())
     valloader_out = DataLoader(valset_out, batch_size=batch_size, shuffle=False, num_workers=2)
-
     return trainloader_out, valloader_out
+
+# def get_out_training_loaders(batch_size):
+
+#     trainset_out = torchvision.datasets.ImageFolder(root = 'data/food-101/images/', loader=food_loader, 
+#                                                     transform = transforms.Compose([transforms.ToPILImage(),
+#                                                                                     transforms.RandomChoice(
+#                                                                                         [transforms.RandomApply([transforms.RandomAffine(90, translate=(0.15, 0.15), scale=(0.85, 1), shear=None)], p=0.6),
+#                                                                                          transforms.RandomApply([transforms.RandomAffine(0, translate=None, scale=(0.5, 0.75), shear=30)], p=0.6),
+#                                                                                          transforms.RandomApply([transforms.AutoAugment()], p=0.9),]),
+#                                                                                     transforms.ToTensor(),  ]))
+#     trainloader_out = DataLoader(trainset_out, batch_size=batch_size, shuffle=True, num_workers=2)
+
+#     valset_out = torchvision.datasets.SVHN(root='./data', split='test', download=True, transform=transforms.ToTensor())
+#     valloader_out = DataLoader(valset_out, batch_size=batch_size, shuffle=False, num_workers=2)
+
+#     return trainloader_out, valloader_out
 
 def bird_loader(path):
     path = path.split('/')
@@ -55,6 +120,27 @@ def get_out_testing_datasets(out_names):
                                                                                                   ]))
             returned_out_names.append(name)
             out_datasets.append(mnist)
+        
+
+        elif name == 'cifar10':
+            cifar10 = torchvision.datasets.CIFAR10(root='/mnt/new_drive/ExposureExperiment/data/Datasets/CIFAR10', train=False,
+                                          download=False, transform=transforms.ToTensor())
+
+
+            returned_out_names.append(name)
+            out_datasets.append(cifar10)
+            
+            print("Open Set Cifar10 Run!")
+            
+        elif name == 'cifar100':
+            cifar100 = torchvision.datasets.CIFAR100(root='/mnt/new_drive/ExposureExperiment/data/Datasets/CIFAR100', train=False,
+                                          download=False, transform=transforms.ToTensor())
+
+            returned_out_names.append(name)
+            out_datasets.append(cifar100)
+            
+            print("Open Set Cifar100 Run!")
+            
         
         elif name == 'tiny_imagenet':
             tiny_imagenet = torchvision.datasets.ImageFolder(root = 'data/tiny-imagenet-200/test', transform=transforms.Compose([transforms.ToTensor(),
@@ -100,6 +186,9 @@ def get_out_testing_datasets(out_names):
             
             returned_out_names.append(name)
             out_datasets.append(coil_100)
+        
+
+
         
         else:
           print(name, ' dataset is not implemented.')

@@ -33,6 +33,8 @@ def get_args():
     
     parser.add_argument('--run_name', default='test', type=str)
     parser.add_argument('--seed', default=0, type=int)
+
+    parser.add_argument('--exposure_name', default='food-101', type=str)
     
   
     return parser.parse_args()
@@ -55,6 +57,10 @@ clean_val = alpha<=0.5
 run_name = args.run_name
 print('Run name:', run_name)
 
+
+exposure_name = args.exposure_name
+print('Run name:', exposure_name)
+
 #set random seed
 seed = args.seed
 fix_random_seed(seed)
@@ -67,7 +73,7 @@ model = get_feature_extractor_model(training_type, in_dataset)
 trainloader, valloader = get_in_training_loaders(in_dataset, batch_size)
 
 #out dataset
-trainloader_out, valloader_out = get_out_training_loaders(batch_size)
+trainloader_out, valloader_out = get_out_training_loaders(batch_size,exposure_name)
 
 
 #Model DCGAN

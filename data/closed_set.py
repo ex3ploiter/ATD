@@ -6,12 +6,12 @@ from torchvision import transforms
 def get_in_training_loaders(in_dataset, batch_size):
 
     if in_dataset == 'cifar10':
-        dataset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                          download=True, transform=transforms.ToTensor())
+        dataset = torchvision.datasets.CIFAR10(root='/mnt/new_drive/ExposureExperiment/data/Datasets/CIFAR10', train=True,
+                                          download=False, transform=transforms.ToTensor())
 
     elif in_dataset == 'cifar100':
-        dataset = torchvision.datasets.CIFAR100(root='./data', train=True,
-                                          download=True, transform=transforms.ToTensor())
+        dataset = torchvision.datasets.CIFAR100(root='/mnt/new_drive/ExposureExperiment/data/Datasets/CIFAR100', train=True,
+                                          download=False, transform=transforms.ToTensor())
 
     elif in_dataset == 'TI':
         dataset = torchvision.datasets.ImageFolder(root = './data/tiny-imagenet-200/train', transform=transforms.Compose([transforms.Resize(32), transforms.ToTensor()]))
@@ -29,12 +29,12 @@ def get_in_training_loaders(in_dataset, batch_size):
 def get_in_testing_loader(in_dataset, batch_size):
 
     if in_dataset == 'cifar10':
-        testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                          download=True, transform=transforms.ToTensor())
+        testset = torchvision.datasets.CIFAR10(root='/mnt/new_drive/ExposureExperiment/data/Datasets/CIFAR10', train=False,
+                                          download=False, transform=transforms.ToTensor())
 
     elif in_dataset == 'cifar100':
-        testset = torchvision.datasets.CIFAR100(root='./data', train=False,
-                                          download=True, transform=transforms.ToTensor())
+        testset = torchvision.datasets.CIFAR100(root='/mnt/new_drive/ExposureExperiment/data/Datasets/CIFAR100', train=False,
+                                          download=False, transform=transforms.ToTensor())
 
     elif in_dataset == 'TI':
         testset = torchvision.datasets.ImageFolder(root = './data/tiny-imagenet-200/val', transform=transforms.Compose([transforms.Resize(32), transforms.ToTensor()]))
